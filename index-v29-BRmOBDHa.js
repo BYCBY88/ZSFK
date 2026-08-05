@@ -58,12 +58,12 @@ Error generating stack: `+i.message+`
 · 胸围：${P.bust||"未填写"}
 特色标签：${Y.length>0?Y.join("、"):"无"}
 基础评分：
-· 颜值：${P.score_look}/5 (权重20%) ${Me(P.score_look,"look")}
-· 胸型：${P.score_breast}/5 (权重20%) ${Me(P.score_breast,"breast")}
-· 腰腹：${P.score_waist}/5 (权重20%) ${Me(P.score_waist,"waist")}
-· 臀腿综合：${P.score_body_lower}/5 (权重15%) ${Me(P.score_body_lower,"bodyLower")}
-· 配合度：${P.score_service}/5 (权重25%) ${Me(P.score_service,"service")}
-增减分项：
+· 颜值：${P.score_look}/5 ${Me(P.score_look,"look")}
+· 胸型：${P.score_breast}/5 ${Me(P.score_breast,"breast")}
+· 腰腹：${P.score_waist}/5 ${Me(P.score_waist,"waist")}
+· 臀腿综合：${P.score_body_lower}/5 ${Me(P.score_body_lower,"bodyLower")}
+· 配合度：${P.score_service}/5 ${Me(P.score_service,"service")}
+附加项：
 · 胸部属性：${Ze[P.breast_nature||"natural"]}
 · 皮肤状态：${Ct[P.skin||"normal"]}
 · 声音条件：${mn[P.voice||"normal"]}
