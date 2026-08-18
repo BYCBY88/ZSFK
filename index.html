@@ -1,17 +1,941 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>测试</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>" />
-  <script type="module" crossorigin src="/ZSFK/index-v29-BRmOBDHa.js"></script>
-  <link rel="stylesheet" crossorigin href="/ZSFK/index-v29-BrY0eDAB.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>老师测评</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .user-info button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .header-right-btn {
+            background: rgba(255,255,255,0.22);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .header-right-btn:hover {
+            background: rgba(255,255,255,0.35);
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap:15px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap:12px;
+        }
+        @media (max-width: 600px) {
+            .form-grid { display:none; }
+            .form-row-2 { grid-template-columns: repeat(2,1fr); }
+            .form-row-3 { grid-template-columns: repeat(3,1fr); }
+            .header { padding:14px 12px; }
+            .header h1 { font-size:18px; margin-bottom:6px; }
+            .header-right-btn {
+                padding:6px 10px;
+                font-size:13px;
+            }
+        }
+        .pc-form { display: grid; grid-template-columns: 1fr 1fr; gap:15px; }
+        .mobile-form { display:none; }
+        @media (max-width:600px){
+            .pc-form { display:none; }
+            .mobile-form { display:block; }
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .form-group label .required { color: #e74c3c; }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .score-item { margin-bottom: 20px; }
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .score-label { font-weight: 500; color: #555; }
+        .score-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ff6b6b, #feca57, #48dbfb, #1dd1a1);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        .score-desc {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #fff3cd;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #856404;
+        }
+        .option-group { margin-bottom: 15px; }
+        .option-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .option-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .option-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .option-btn:hover { border-color: #667eea; }
+        .option-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .option-btn.active.positive {
+            border-color: #1dd1a1;
+            background: #1dd1a1;
+        }
+        .option-btn.active.negative {
+            border-color: #ff6b6b;
+            background: #ff6b6b;
+        }
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .summary-score {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .summary-rating {
+            font-size: 24px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        .summary-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 13px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h3 { margin-bottom: 15px; color: #333; }
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-btn.secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+        .hidden { display: none !important; }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { background: #1dd1a1; }
+        .toast.error { background: #ff6b6b; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="container">
+        <div class="header">
+            <div class="header-center">
+                <div class="user-info">
+                    <span>测评人：<strong id="nickname-display">用户</strong></span>
+                    <button onclick="showNicknameModal()">昵称修改</button>
+                </div>
+            </div>
+            <a class="header-right-btn" href="https://bycby88.github.io/CSB/" target="_blank">榜单</a>
+        </div>
+
+        <!-- 表单 -->
+        <form id="testForm" onsubmit="handleSubmit(event)">
+            <!-- 基本信息 -->
+            <div class="card">
+                <div class="card-title">📋 基本信息</div>
+                <!-- PC端布局 -->
+                <div class="pc-form">
+                    <div class="form-group">
+                        <label>老师ID <span class="required">*</span></label>
+                        <input type="text" id="teacherId" placeholder="如@s204386" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>老师姓名 <span class="required">*</span></label>
+                        <input type="text" id="teacherName" placeholder="输入姓名" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>年龄 <span class="required">*</span></label>
+                        <input type="number" id="age" min="18" max="60" placeholder="18-60" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>单价 <span class="required">*</span></label>
+                        <input type="number" id="price" min="3" max="10" placeholder="3-10" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>身高(cm) <span class="required">*</span></label>
+                        <input type="number" id="height" min="140" max="200" placeholder="140-200" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>体重(kg) <span class="required">*</span></label>
+                        <input type="number" id="weight" min="40" max="80" step="0.1" placeholder="40-80" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>胸围 <span class="required">*</span></label>
+                        <select id="bust" required>
+                            <option value="">请选择</option>
+                            <option value="A-">A-</option>
+                            <option value="A">A</option>
+                            <option value="A+">A+</option>
+                            <option value="B-">B-</option>
+                            <option value="B">B</option>
+                            <option value="B+">B+</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 手机端布局 -->
+                <div class="mobile-form">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>老师ID <span class="required">*</span></label>
+                            <input type="text" id="teacherIdMobile" placeholder="如@s204386" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>老师姓名 <span class="required">*</span></label>
+                            <input type="text" id="teacherNameMobile" placeholder="输入姓名" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>单价 <span class="required">*</span></label>
+                            <input type="number" id="priceMobile" min="3" max="10" placeholder="3-10" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>胸围 <span class="required">*</span></label>
+                            <select id="bustMobile" required>
+                                <option value="">请选择</option>
+                                <option value="A-">A-</option>
+                                <option value="A">A</option>
+                                <option value="A+">A+</option>
+                                <option value="B-">B-</option>
+                                <option value="B">B</option>
+                                <option value="B+">B+</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>年龄 <span class="required">*</span></label>
+                            <input type="number" id="ageMobile" min="18" max="60" placeholder="18‑60" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>身高(cm) <span class="required">*</span></label>
+                            <input type="number" id="heightMobile" min="140" max="200" placeholder="140‑200" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>体重(kg) <span class="required">*</span></label>
+                            <input type="number" id="weightMobile" min="40" max="80" step="0.1" placeholder="40‑80" required autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基础评分 -->
+            <div class="card">
+                <div class="card-title">📊 基础评分（每项权重25%）</div>
+                
+                <div class="score-item">
+                    <div class="score-header">
+                        <span class="score-label">颜值</span>
+                        <span class="score-value" id="lookValue">6分</span>
+                    </div>
+                    <input type="range" id="look" min="1" max="5" step="0.5" value="3" oninput="updateScore('look', this.value)">
+                    <div class="score-desc" id="lookDesc">大众脸，不丑不美</div>
+                </div>
+
+                <div class="score-item">
+                    <div class="score-header">
+                        <span class="score-label">胸型</span>
+                        <span class="score-value" id="breastValue">6分</span>
+                    </div>
+                    <input type="range" id="breast" min="1" max="5" step="0.5" value="3" oninput="updateScore('breast', this.value)">
+                    <div class="score-desc" id="breastDesc">胸型一般，基本正常</div>
+                </div>
+
+                <div class="score-item">
+                    <div class="score-header">
+                        <span class="score-label">身材</span>
+                        <span class="score-value" id="figureValue">6分</span>
+                    </div>
+                    <input type="range" id="figure" min="1" max="5" step="0.5" value="3" oninput="updateScore('figure', this.value)">
+                    <div class="score-desc" id="figureDesc">不胖不瘦，正常身材</div>
+                </div>
+
+                <div class="score-item">
+                    <div class="score-header">
+                        <span class="score-label">服务</span>
+                        <span class="score-value" id="serviceValue">6分</span>
+                    </div>
+                    <input type="range" id="service" min="1" max="5" step="0.5" value="3" oninput="updateScore('service', this.value)">
+                    <div class="score-desc" id="serviceDesc">稍有服务，态度积极</div>
+                </div>
+
+                <!-- 汇总 -->
+                <div class="summary">
+                    <div class="summary-header">
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">最终得分</div>
+                            <div class="summary-score" id="finalScore">6.00</div>
+                        </div>
+                    </div>
+                    <div class="summary-details">
+                        <div>基础分：<span id="baseScore">6.00</span></div>
+                        <div>增减分：<span id="extraScore">+0.0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 附加项 -->
+            <div class="card">
+                <div class="card-title">➕ 附加项</div>
+                
+                <div class="option-group">
+                    <label>胸型质感</label>
+                    <div class="option-buttons">
+                        <div class="option-btn" data-group="breastNature" data-value="soft" onclick="selectOption(this)">天然柔软</div>
+                        <div class="option-btn" data-group="breastNature" data-value="normal" onclick="selectOption(this)">轻微科技</div>
+                        <div class="option-btn" data-group="breastNature" data-value="hard" onclick="selectOption(this)">帮帮硬</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label>皮肤状态</label>
+                    <div class="option-buttons">
+                        <div class="option-btn" data-group="skin" data-value="smooth" onclick="selectOption(this)">光滑细腻</div>
+                        <div class="option-btn" data-group="skin" data-value="normal" onclick="selectOption(this)">正常</div>
+                        <div class="option-btn" data-group="skin" data-value="rough" onclick="selectOption(this)">粗糙暗沉</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label>声音条件</label>
+                    <div class="option-buttons">
+                        <div class="option-btn" data-group="voice" data-value="pleasant" onclick="selectOption(this)">悦耳动听</div>
+                        <div class="option-btn" data-group="voice" data-value="normal" onclick="selectOption(this)">正常</div>
+                        <div class="option-btn" data-group="voice" data-value="bad" onclick="selectOption(this)">难听刺耳</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label>纹身情况</label>
+                    <div class="option-buttons">
+                        <div class="option-btn" data-group="tattoo" data-value="light" onclick="selectOption(this)">无纹身</div>
+                        <div class="option-btn" data-group="tattoo" data-value="small" onclick="selectOption(this)">小面积</div>
+                        <div class="option-btn" data-group="tattoo" data-value="heavy" onclick="selectOption(this)">大面积</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label>腰腹状态</label>
+                    <div class="option-buttons">
+                        <div class="option-btn" data-group="waist" data-value="tight" onclick="selectOption(this)">紧致</div>
+                        <div class="option-btn" data-group="waist" data-value="flat" onclick="selectOption(this)">平坦</div>
+                        <div class="option-btn" data-group="waist" data-value="belly" onclick="selectOption(this)">小肚子</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 不足之处 -->
+            <div class="card">
+                <div class="card-title">📝 不足之处与描述</div>
+                <div class="form-group">
+                    <label>不足之处（填写扣0.2分）</label>
+                    <input type="text" id="shortcoming" placeholder="如有明显不足请描述" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>详细描述 <span class="required">*</span></label>
+                    <textarea id="description" placeholder="描述老师的其他特点、服务体验等...（最多150字）" maxlength="150" required autocomplete="off"></textarea>
+                    <div style="text-align: right; font-size: 12px; color: #999; margin-top: 5px;">
+                        <span id="descCount">0</span>/150字
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">✨ 生成报告并提交</button>
+        </form>
+    </div>
+
+    <!-- 昵称修改弹窗 -->
+    <div class="modal-overlay hidden" id="nicknameModal">
+        <div class="modal">
+            <h3>修改昵称</h3>
+            <input type="text" id="nicknameInput" placeholder="请输入昵称" maxlength="20" autocomplete="off">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeNicknameModal()">取消</button>
+                <button class="modal-btn primary" onclick="saveNickname()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="modal-overlay hidden" id="successModal">
+        <div class="modal">
+            <h3 style="color: #1dd1a1;">✓ 提交成功</h3>
+            <p style="margin: 15px 0; color: #666;">报告已生成并复制到剪贴板</p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="copyAgain()">再次复制</button>
+                <button class="modal-btn secondary" onclick="closeSuccessModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+        // 状态管理
+        const state = {
+            nickname: '',
+            scores: { look: 3, breast: 3, figure: 3, service: 3 },
+            options: {
+                breastNature: null,
+                skin: null,
+                voice: null,
+                tattoo: null,
+                waist: null
+            }
+        };
+
+        // 评分描述
+        const scoreDescs = {
+            look: ['丑', '普通偏下', '大众脸，不丑不美', '好看，有辨识度', '惊艳，素颜能打'],
+            breast: ['胸型塌陷，影响整体美感', '胸型下垂，注意体态调整', '胸型一般，基本正常', '胸型挺拔，形态良好', '胸型完美，形态极佳'],
+            figure: ['太差，没法看', '没腰没臀，平板身材', '不胖不瘦，正常身材', '有腰有臀，曲线明显', '前凸后翘，穿啥都炸'],
+            service: ['态度恶劣，没法沟通', '服务一般，有些机车', '稍有服务，态度积极', '比较专业服务，有特色', '专业服务，体验极佳']
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initNickname();
+            updateSummary();
+            
+            document.getElementById('description').addEventListener('input', function() {
+                document.getElementById('descCount').textContent = this.value.length;
+            });
+
+            document.getElementById('shortcoming').addEventListener('input', updateSummary);
+
+            // 手机端与PC双向同步
+            const syncList = [
+                ['teacherId','teacherIdMobile'],
+                ['teacherName','teacherNameMobile'],
+                ['age','ageMobile'],
+                ['price','priceMobile'],
+                ['height','heightMobile'],
+                ['weight','weightMobile'],
+                ['bust','bustMobile']
+            ];
+            syncList.forEach(([pcId,mId])=>{
+                const pcEl = document.getElementById(pcId);
+                const mEl = document.getElementById(mId);
+                pcEl.addEventListener('input',()=>{ mEl.value = pcEl.value; });
+                mEl.addEventListener('input',()=>{ pcEl.value = mEl.value; });
+                if(pcEl.tagName==='SELECT') pcEl.addEventListener('change',()=>{ mEl.value = pcEl.value; });
+                if(mEl.tagName==='SELECT') mEl.addEventListener('change',()=>{ pcEl.value = mEl.value; });
+            });
+        });
+
+        // 昵称管理
+        function initNickname() {
+            const saved = localStorage.getItem('evaluator_nickname');
+            if (saved) {
+                state.nickname = saved;
+            } else {
+                state.nickname = '用户' + Math.floor(Math.random() * 10000);
+                localStorage.setItem('evaluator_nickname', state.nickname);
+            }
+            document.getElementById('nickname-display').textContent = state.nickname;
+        }
+
+        function showNicknameModal() {
+            document.getElementById('nicknameInput').value = state.nickname;
+            document.getElementById('nicknameModal').classList.remove('hidden');
+        }
+
+        function closeNicknameModal() {
+            document.getElementById('nicknameModal').classList.add('hidden');
+        }
+
+        function saveNickname() {
+            const newNick = document.getElementById('nicknameInput').value.trim();
+            if (newNick) {
+                state.nickname = newNick;
+                localStorage.setItem('evaluator_nickname', newNick);
+                document.getElementById('nickname-display').textContent = newNick;
+                closeNicknameModal();
+                showToast('昵称已保存', 'success');
+            }
+        }
+
+        // 评分更新
+        function updateScore(type, value) {
+            state.scores[type] = parseFloat(value);
+            // 5分制转换为10分制显示
+            const displayValue = (parseFloat(value) * 2).toFixed(0);
+            document.getElementById(type + 'Value').textContent = displayValue + '分';
+
+            const index = Math.min(Math.floor(parseFloat(value) - 0.5), 4);
+            document.getElementById(type + 'Desc').textContent = scoreDescs[type][index];
+
+            updateSummary();
+        }
+
+        // 选项选择
+        function selectOption(el) {
+            const group = el.dataset.group;
+            const value = el.dataset.value;
+            
+            document.querySelectorAll(`[data-group="${group}"]`).forEach(btn => {
+                btn.classList.remove('active', 'positive', 'negative');
+            });
+            
+            el.classList.add('active');
+            if (el.textContent.includes('+')) el.classList.add('positive');
+            if (el.textContent.includes('-')) el.classList.add('negative');
+            
+            state.options[group] = value;
+            updateSummary();
+        }
+
+        // 附加项前端校验：5项必须全部选中
+        function validateExtraOptions(){
+            const requiredExtra = [
+                { key: 'breastNature', label: '胸型质感' },
+                { key: 'skin', label: '皮肤状态' },
+                { key: 'voice', label: '声音条件' },
+                { key: 'tattoo', label: '纹身情况' },
+                { key: 'waist', label: '腰腹状态' }
+            ];
+            for(const item of requiredExtra){
+                if(!state.options[item.key]){
+                    showToast(`请选择【${item.label}】`, 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // 计算分数
+        function calculateScore() {
+            // 基础分：slider是1-5分，显示时×2转为10分制
+            // 计算时直接用10分制的值求平均
+            const look10 = state.scores.look * 2;
+            const breast10 = state.scores.breast * 2;
+            const figure10 = state.scores.figure * 2;
+            const service10 = state.scores.service * 2;
+            const base = (look10 + breast10 + figure10 + service10) / 4;
+
+            let extra = 0;
+            if (state.options.breastNature === 'soft') extra += 0.2;
+            if (state.options.breastNature === 'hard') extra -= 0.2;
+
+            const bust = document.getElementById('bust').value;
+            if (bust === 'A' || bust === 'A-') extra -= 0.4;
+            else if (bust === 'B-' || bust === 'A+') extra -= 0.2;
+
+            if (document.getElementById('shortcoming').value.trim()) extra -= 0.2;
+
+            if (state.options.skin === 'smooth') extra += 0.2;
+            if (state.options.skin === 'rough') extra -= 0.2;
+
+            if (state.options.voice === 'pleasant') extra += 0.2;
+            if (state.options.voice === 'bad') extra -= 0.2;
+
+            if (state.options.tattoo === 'light') extra += 0.2;
+            if (state.options.tattoo === 'heavy') extra -= 0.2;
+
+            if (state.options.waist === 'tight') extra += 0.2;
+            if (state.options.waist === 'belly') extra -= 0.2;
+
+            const final = Math.max(0, base + extra);
+            return { base, extra, final, look10, breast10, figure10, service10 };
+        }
+
+
+        function updateSummary() {
+            const { base, extra, final } = calculateScore();
+            document.getElementById('baseScore').textContent = base.toFixed(2);
+            document.getElementById('extraScore').textContent = (extra >= 0 ? '+' : '') + extra.toFixed(1);
+            document.getElementById('finalScore').textContent = final.toFixed(2);
+        }
+
+        // 生成报告
+        function generateReport() {
+            const teacherId = document.getElementById('teacherId').value;
+            const teacherName = document.getElementById('teacherName').value;
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const price = document.getElementById('price').value;
+            const bust = document.getElementById('bust').value;
+            const shortcoming = document.getElementById('shortcoming').value;
+            const description = document.getElementById('description').value;
+            const { final, look10, breast10, figure10, service10 } = calculateScore();
+
+            const lookDesc = document.getElementById('lookDesc').textContent;
+            const breastDesc = document.getElementById('breastDesc').textContent;
+            const figureDesc = document.getElementById('figureDesc').textContent;
+            const serviceDesc = document.getElementById('serviceDesc').textContent;
+
+            const maps = {
+                breastNature: { soft: '天然柔软', normal: '轻微科技', hard: '帮帮硬', null: '未选择' },
+                skin: { smooth: '光滑细腻', normal: '正常', rough: '粗糙暗沉', null: '未选择' },
+                voice: { pleasant: '悦耳动听', normal: '正常', bad: '难听刺耳', null: '未选择' },
+                tattoo: { light: '无纹身', small: '小面积', heavy: '大面积', null: '未选择' },
+                waist: { tight: '紧致', flat: '平坦', belly: '小肚子', null: '未选择' }
+            };
+
+            return `【老师测评报告】
+
+━━━━━━━
+基本信息
+· 老师ID：${teacherId}
+· 老师姓名：${teacherName}
+· 年龄：${age}岁
+· 身高：${height}cm
+· 体重：${weight}kg
+· 单价：${price}
+· 胸围：${bust}
+基础评分（10分制）：
+· 颜值：${look10}/10 【${lookDesc}】
+· 胸型：${breast10}/10 【${breastDesc}】
+· 身材：${figure10}/10 【${figureDesc}】
+· 服务：${service10}/10 【${serviceDesc}】
+附加项：
+· 胸型质感：${maps.breastNature[state.options.breastNature]}
+· 皮肤状态：${maps.skin[state.options.skin]}
+· 声音条件：${maps.voice[state.options.voice]}
+· 纹身情况：${maps.tattoo[state.options.tattoo]}
+· 腰腹状态：${maps.waist[state.options.waist]}
+最终得分：${final.toFixed(2)}分
+
+不足之处：
+${shortcoming || '无'}
+详细描述：
+${description}
+━━━━━━━
+测评人：${state.nickname}`;
+        }
+
+        // API 提交数据（对接新单表teacher_evaluations）
+        async function submitToAPI() {
+            const API_URL = 'https://cp.byg88.biz/api/collections/teacher_evaluations/records';
+
+            const bust = document.getElementById('bust').value;
+            const { final, look10, breast10, figure10, service10 } = calculateScore();
+
+            const requestBody = {
+                evaluator: state.nickname,
+                teacher_id: document.getElementById('teacherId').value,
+                teacher_name: document.getElementById('teacherName').value,
+                age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+                height: document.getElementById('height').value ? parseInt(document.getElementById('height').value) : null,
+                weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
+                price: document.getElementById('price').value ? parseInt(document.getElementById('price').value) : null,
+                bust: bust || null,
+
+                score_look: look10,
+                score_breast: breast10,
+                score_figure: figure10,
+                score_service: service10,
+                final_score: final,
+
+                breast_nature: state.options.breastNature,
+                skin: state.options.skin,
+                voice: state.options.voice,
+                tattoo: state.options.tattoo,
+                waist: state.options.waist,
+
+                shortcoming: document.getElementById('shortcoming').value.trim() || null,
+                description: document.getElementById('description').value.trim()
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const resJson = await response.json();
+                if (!response.ok) {
+                    showToast(resJson.error || '提交失败', 'error');
+                    console.error('API 提交失败:', resJson);
+                    return false;
+                }
+                showToast('数据已提交服务器','success');
+                console.log('API 提交成功',resJson);
+                return true;
+            } catch (err) {
+                showToast('网络异常，提交失败','error');
+                console.error('API 提交错误:', err);
+                return false;
+            }
+        }
+
+        // 提交处理
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            // 前端校验附加项，不满足直接返回
+            if(!validateExtraOptions()){
+                return;
+            }
+
+            const report = generateReport();
+
+            try {
+                await navigator.clipboard.writeText(report);
+                showToast('报告已复制到剪贴板', 'success');
+            } catch (err) {
+                showToast('复制失败，请手动复制', 'error');
+            }
+
+            // 异步提交到 API
+            submitToAPI();
+
+            document.getElementById('successModal').classList.remove('hidden');
+            
+            // 重置表单
+            document.getElementById('testForm').reset();
+            state.scores = { look: 3, breast: 3, figure: 3, service: 3 };
+            state.options = { breastNature: null, skin: null, voice: null, tattoo: null, waist: null };
+            
+            document.querySelectorAll('.option-btn').forEach(el => {
+                el.classList.remove('active', 'positive', 'negative');
+            });
+            
+            ['look', 'breast', 'figure', 'service'].forEach(type => {
+                document.getElementById(type).value = 3;
+                document.getElementById(type + 'Value').textContent = '6分';
+                document.getElementById(type + 'Desc').textContent = scoreDescs[type][2];
+            });
+            
+            document.getElementById('descCount').textContent = '0';
+            updateSummary();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        async function copyAgain() {
+            try {
+                await navigator.clipboard.writeText(generateReport());
+                showToast('已复制', 'success');
+            } catch (err) {
+                showToast('复制失败', 'error');
+            }
+        }
+
+        // Toast
+        function showToast(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+</script>
 </body>
 </html>
