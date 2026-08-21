@@ -757,7 +757,7 @@ ${description}
 测评人：${state.nickname}`;
         }
         async function submitToAPI() {
-            const API_URL = 'https://cp.byg88.biz/api/collections/teacher_evaluations/records';
+            const API_URL = 'https://cp.byg88.biz/api/collections/measured_scores/records';
             const bust = document.getElementById('bust').value;
             const { final, look10, breast10, figure10, service10 } = calculateScore();
             const requestBody = {
