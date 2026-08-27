@@ -183,42 +183,6 @@
             font-size: 12px;
             color: #856404;
         }
-        .option-group { margin-bottom: 15px; }
-        .option-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        .option-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-        .option-btn {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-        .option-btn:hover { border-color: #667eea; }
-        .option-btn.active {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-        .option-btn.active.positive {
-            border-color: #1dd1a1;
-            background: #1dd1a1;
-        }
-        .option-btn.active.negative {
-            border-color: #ff6b6b;
-            background: #ff6b6b;
-        }
         .summary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -490,49 +454,6 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">➕ 附加项</div>
-                <div class="option-group">
-                    <label>胸型质感</label>
-                    <div class="option-buttons">
-                        <div class="option-btn" data-group="breastNature" data-value="soft" onclick="selectOption(this)">天然柔软</div>
-                        <div class="option-btn" data-group="breastNature" data-value="normal" onclick="selectOption(this)">轻微科技</div>
-                        <div class="option-btn" data-group="breastNature" data-value="hard" onclick="selectOption(this)">帮帮硬</div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label>皮肤状态</label>
-                    <div class="option-buttons">
-                        <div class="option-btn" data-group="skin" data-value="smooth" onclick="selectOption(this)">光滑细腻</div>
-                        <div class="option-btn" data-group="skin" data-value="normal" onclick="selectOption(this)">正常</div>
-                        <div class="option-btn" data-group="skin" data-value="rough" onclick="selectOption(this)">粗糙暗沉</div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label>声音条件</label>
-                    <div class="option-buttons">
-                        <div class="option-btn" data-group="voice" data-value="pleasant" onclick="selectOption(this)">悦耳动听</div>
-                        <div class="option-btn" data-group="voice" data-value="normal" onclick="selectOption(this)">正常</div>
-                        <div class="option-btn" data-group="voice" data-value="bad" onclick="selectOption(this)">难听刺耳</div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label>纹身情况</label>
-                    <div class="option-buttons">
-                        <div class="option-btn" data-group="tattoo" data-value="light" onclick="selectOption(this)">无纹身</div>
-                        <div class="option-btn" data-group="tattoo" data-value="small" onclick="selectOption(this)">小面积</div>
-                        <div class="option-btn" data-group="tattoo" data-value="heavy" onclick="selectOption(this)">大面积</div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label>腰腹状态</label>
-                    <div class="option-buttons">
-                        <div class="option-btn" data-group="waist" data-value="tight" onclick="selectOption(this)">紧致</div>
-                        <div class="option-btn" data-group="waist" data-value="flat" onclick="selectOption(this)">平坦</div>
-                        <div class="option-btn" data-group="waist" data-value="belly" onclick="selectOption(this)">小肚子</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
                 <div class="card-title">📝 不足之处与描述</div>
                 <div class="form-group">
                     <label>不足之处（填写扣0.2分）</label>
@@ -546,7 +467,7 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="submit-btn">✨ 生成报告并提交</button>
+            <button type="submit" class="submit-btn" onclick="handleSubmit(event)">✨ 生成报告并提交</button>
         </form>
     </div>
     <div class="modal-overlay hidden" id="nicknameModal">
@@ -572,15 +493,34 @@
 <script>
         const state = {
             nickname: '',
-            scores: { look: 3, breast: 3, figure: 3, service: 3 },
-            options: {
-                breastNature: null,
-                skin: null,
-                voice: null,
-                tattoo: null,
-                waist: null
-            }
+            scores: { look: 3, breast: 3, figure: 3, service: 3 }
         };
+        // 自动适配PC/移动端取值
+        function getVal(pcId, mobileId){
+            const pc = document.getElementById(pcId);
+            const mob = document.getElementById(mobileId);
+            if(window.innerWidth <= 600){
+                return mob?.value ?? pc?.value ?? '';
+            }else{
+                return pc?.value ?? mob?.value ?? '';
+            }
+        }
+        // 移动端兼容复制
+        async function safeCopy(text){
+            if (!navigator.clipboard){
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position='fixed';
+                ta.style.opacity='0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                return true;
+            }
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
         const scoreDescs = {
             look: ['丑', '普通偏下', '大众脸，不丑不美', '好看，有辨识度', '惊艳，素颜能打'],
             breast: ['胸型塌陷，影响整体美感', '胸型下垂，注意体态调整', '胸型一般，基本正常', '胸型挺拔，形态良好', '胸型完美，形态极佳'],
@@ -647,34 +587,6 @@
             document.getElementById(type + 'Desc').textContent = scoreDescs[type][index];
             updateSummary();
         }
-        function selectOption(el) {
-            const group = el.dataset.group;
-            const value = el.dataset.value;
-            document.querySelectorAll(`[data-group="${group}"]`).forEach(btn => {
-                btn.classList.remove('active', 'positive', 'negative');
-            });
-            el.classList.add('active');
-            if (el.textContent.includes('+')) el.classList.add('positive');
-            if (el.textContent.includes('-')) el.classList.add('negative');
-            state.options[group] = value;
-            updateSummary();
-        }
-        function validateExtraOptions(){
-            const requiredExtra = [
-                { key: 'breastNature', label: '胸型质感' },
-                { key: 'skin', label: '皮肤状态' },
-                { key: 'voice', label: '声音条件' },
-                { key: 'tattoo', label: '纹身情况' },
-                { key: 'waist', label: '腰腹状态' }
-            ];
-            for(const item of requiredExtra){
-                if(!state.options[item.key]){
-                    showToast(`请选择【${item.label}】`, 'error');
-                    return false;
-                }
-            }
-            return true;
-        }
         function calculateScore() {
             const look10 = state.scores.look * 2;
             const breast10 = state.scores.breast * 2;
@@ -682,20 +594,10 @@
             const service10 = state.scores.service * 2;
             const base = (look10 + breast10 + figure10 + service10) / 4;
             let extra = 0;
-            if (state.options.breastNature === 'soft') extra += 0.2;
-            if (state.options.breastNature === 'hard') extra -= 0.2;
-            const bust = document.getElementById('bust').value;
+            const bust = getVal('bust','bustMobile');
             if (bust === 'A' || bust === 'A-') extra -= 0.4;
             else if (bust === 'B-' || bust === 'A+') extra -= 0.2;
-            if (document.getElementById('shortcoming').value.trim()) extra -= 0.2;
-            if (state.options.skin === 'smooth') extra += 0.2;
-            if (state.options.skin === 'rough') extra -= 0.2;
-            if (state.options.voice === 'pleasant') extra += 0.2;
-            if (state.options.voice === 'bad') extra -= 0.2;
-            if (state.options.tattoo === 'light') extra += 0.2;
-            if (state.options.tattoo === 'heavy') extra -= 0.2;
-            if (state.options.waist === 'tight') extra += 0.2;
-            if (state.options.waist === 'belly') extra -= 0.2;
+            if (getVal('shortcoming','')?.trim()) extra -= 0.2;
             const final = Math.max(0, base + extra);
             return { base, extra, final, look10, breast10, figure10, service10 };
         }
@@ -706,27 +608,21 @@
             document.getElementById('finalScore').textContent = final.toFixed(2);
         }
         function generateReport() {
-            const teacherId = document.getElementById('teacherId').value;
-            const teacherName = document.getElementById('teacherName').value;
-            const age = document.getElementById('age').value;
-            const height = document.getElementById('height').value;
-            const weight = document.getElementById('weight').value;
-            const price = document.getElementById('price').value;
-            const bust = document.getElementById('bust').value;
-            const shortcoming = document.getElementById('shortcoming').value;
+            const teacherId = getVal('teacherId','teacherIdMobile');
+            const teacherName = getVal('teacherName','teacherNameMobile');
+            const age = getVal('age','ageMobile');
+            const height = getVal('height','heightMobile');
+            const weight = getVal('weight','weightMobile');
+            const price = getVal('price','priceMobile');
+            const bust = getVal('bust','bustMobile');
+            const shortcoming = getVal('shortcoming','');
             const description = document.getElementById('description').value;
             const { final, look10, breast10, figure10, service10 } = calculateScore();
             const lookDesc = document.getElementById('lookDesc').textContent;
             const breastDesc = document.getElementById('breastDesc').textContent;
             const figureDesc = document.getElementById('figureDesc').textContent;
             const serviceDesc = document.getElementById('serviceDesc').textContent;
-            const maps = {
-                breastNature: { soft: '天然柔软', normal: '轻微科技', hard: '帮帮硬', null: '未选择' },
-                skin: { smooth: '光滑细腻', normal: '正常', rough: '粗糙暗沉', null: '未选择' },
-                voice: { pleasant: '悦耳动听', normal: '正常', bad: '难听刺耳', null: '未选择' },
-                tattoo: { light: '无纹身', small: '小面积', heavy: '大面积', null: '未选择' },
-                waist: { tight: '紧致', flat: '平坦', belly: '小肚子', null: '未选择' }
-            };
+
             return `【老师测评报告】
 ━━━━━━━
 基本信息
@@ -742,12 +638,6 @@
 · 胸型：${breast10}/10 【${breastDesc}】
 · 身材：${figure10}/10 【${figureDesc}】
 · 服务：${service10}/10 【${serviceDesc}】
-附加项：
-· 胸型质感：${maps.breastNature[state.options.breastNature]}
-· 皮肤状态：${maps.skin[state.options.skin]}
-· 声音条件：${maps.voice[state.options.voice]}
-· 纹身情况：${maps.tattoo[state.options.tattoo]}
-· 腰腹状态：${maps.waist[state.options.waist]}
 最终得分：${final.toFixed(2)}分
 不足之处：
 ${shortcoming || '无'}
@@ -759,28 +649,23 @@ ${description}
         }
         async function submitToAPI() {
             const API_URL = 'https://cp.byg88.biz/api/collections/measured_scores/records';
-            const bust = document.getElementById('bust').value;
+            const bust = getVal('bust','bustMobile');
             const { final, look10, breast10, figure10, service10 } = calculateScore();
             const requestBody = {
                 evaluator: state.nickname,
-                teacher_id: document.getElementById('teacherId').value,
-                teacher_name: document.getElementById('teacherName').value,
-                age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
-                height: document.getElementById('height').value ? parseInt(document.getElementById('height').value) : null,
-                weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
-                price: document.getElementById('price').value ? parseInt(document.getElementById('price').value) : null,
+                teacher_id: getVal('teacherId','teacherIdMobile'),
+                teacher_name: getVal('teacherName','teacherNameMobile'),
+                age: getVal('age','ageMobile') ? parseInt(getVal('age','ageMobile')) : null,
+                height: getVal('height','heightMobile') ? parseInt(getVal('height','heightMobile')) : null,
+                weight: getVal('weight','weightMobile') ? parseFloat(getVal('weight','weightMobile')) : null,
+                price: getVal('price','priceMobile') ? parseInt(getVal('price','priceMobile')) : null,
                 bust: bust || null,
                 score_look: look10,
                 score_breast: breast10,
                 score_figure: figure10,
                 score_service: service10,
                 final_score: final,
-                breast_nature: state.options.breastNature,
-                skin: state.options.skin,
-                voice: state.options.voice,
-                tattoo: state.options.tattoo,
-                waist: state.options.waist,
-                shortcoming: document.getElementById('shortcoming').value.trim() || null,
+                shortcoming: getVal('shortcoming','')?.trim() || null,
                 description: document.getElementById('description').value.trim()
             };
             try {
@@ -806,12 +691,10 @@ ${description}
         }
         async function handleSubmit(e) {
             e.preventDefault();
-            if(!validateExtraOptions()){
-                return;
-            }
+            showToast("正在校验表单...","success");
             const report = generateReport();
             try {
-                await navigator.clipboard.writeText(report);
+                await safeCopy(report);
                 showToast('报告已复制到剪贴板', 'success');
             } catch (err) {
                 showToast('复制失败，请手动复制', 'error');
@@ -821,10 +704,6 @@ ${description}
                 document.getElementById('successModal').classList.remove('hidden');
                 document.getElementById('testForm').reset();
                 state.scores = { look: 3, breast: 3, figure: 3, service: 3 };
-                state.options = { breastNature: null, skin: null, voice: null, tattoo: null, waist: null };
-                document.querySelectorAll('.option-btn').forEach(el => {
-                    el.classList.remove('active', 'positive', 'negative');
-                });
                 ['look', 'breast', 'figure', 'service'].forEach(type => {
                     document.getElementById(type).value = 3;
                     document.getElementById(type+'Value').textContent = '6分';
@@ -833,26 +712,13 @@ ${description}
                 document.getElementById('descCount').textContent = '0';
                 updateSummary();
             }
-            document.getElementById('testForm').reset();
-            state.scores = { look: 3, breast: 3, figure: 3, service: 3 };
-            state.options = { breastNature: null, skin: null, voice: null, tattoo: null, waist: null };
-            document.querySelectorAll('.option-btn').forEach(el => {
-                el.classList.remove('active', 'positive', 'negative');
-            });
-            ['look', 'breast', 'figure', 'service'].forEach(type => {
-                document.getElementById(type).value = 3;
-                document.getElementById(type + 'Value').textContent = '6分';
-                document.getElementById(type + 'Desc').textContent = scoreDescs[type][2];
-            });
-            document.getElementById('descCount').textContent = '0';
-            updateSummary();
         }
         function closeSuccessModal() {
             document.getElementById('successModal').classList.add('hidden');
         }
         async function copyAgain() {
             try {
-                await navigator.clipboard.writeText(generateReport());
+                await safeCopy(generateReport());
                 showToast('已复制', 'success');
             } catch (err) {
                 showToast('复制失败', 'error');
